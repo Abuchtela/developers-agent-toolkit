@@ -15,6 +15,11 @@ import { getServicesList } from '@/shared/tools/services/getServicesList';
 import { getApiOperationList } from '@/shared/tools/operations/getApiOperationList';
 import { getApiOperationDetails } from '@/shared/tools/operations/getApiOperationDetails';
 
+// Corporate credit card tools
+import { checkSpendingLimits } from '@/shared/tools/card/checkSpendingLimits';
+import { createCardPayment } from '@/shared/tools/card/createCardPayment';
+import { getCardTransactions } from '@/shared/tools/card/getCardTransactions';
+
 export const tools = (context: ToolContext): Tool[] => [
   // Services
   getServicesList(context),
@@ -30,4 +35,13 @@ export const tools = (context: ToolContext): Tool[] => [
   // API Operations
   getApiOperationList(context),
   getApiOperationDetails(context),
+
+  // Corporate credit card (only included when cardContext is configured)
+  ...(context.cardContext
+    ? [
+        checkSpendingLimits(context),
+        createCardPayment(context),
+        getCardTransactions(context),
+      ]
+    : []),
 ];

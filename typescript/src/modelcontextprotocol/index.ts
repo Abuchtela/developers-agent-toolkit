@@ -1,15 +1,38 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { defaultDevelopersApi } from '@/shared/api';
 import { tools } from '@/shared/tools';
-import { ToolContext } from '@/shared/types';
+import { ToolContext, SpendingLimits } from '@/shared/types';
+import { BudgetTracker } from '@/shared/card/budgetTracker';
 import { version } from '../../package.json';
 
-export type { DevelopersApi, Tool, ToolContext } from '@/shared/types';
+export type {
+  DevelopersApi,
+  Tool,
+  ToolContext,
+  SpendingLimits,
+  CardTransaction,
+  CardContext,
+} from '@/shared/types';
+export { BudgetTracker } from '@/shared/card/budgetTracker';
 export { tools } from '@/shared/tools';
 
 export interface MastercardDevelopersAgentToolkitConfig {
   service?: string;
   apiSpecification?: string;
+  /**
+   * When provided, enables the corporate credit card tools
+   * (check-spending-limits, create-card-payment, get-card-transactions)
+   * with the given spending limits enforced on every purchase attempt.
+   */
+  corporateCreditCard?: CorporateCreditCardConfig;
+}
+
+/**
+ * Configuration for the corporate credit card integration.
+ * All monetary values must be in the same currency as `currency` (default: USD).
+ */
+export interface CorporateCreditCardConfig {
+  spendingLimits: SpendingLimits;
 }
 
 export class MastercardDevelopersAgentToolkit extends McpServer {
@@ -89,6 +112,15 @@ export function buildContext(
     context.apiSpecificationPath = parsed.apiSpecificationPath;
   }
 
+  if (config.corporateCreditCard != null) {
+    const { spendingLimits } = config.corporateCreditCard;
+    validateSpendingLimits(spendingLimits);
+    context.cardContext = {
+      spendingLimits,
+      budgetTracker: new BudgetTracker(),
+    };
+  }
+
   return context;
 }
 
@@ -158,5 +190,39 @@ function parseAPISpecificationPathAndServiceId(
     return null;
   } catch {
     return null;
+  }
+}
+
+function validateSpendingLimits(limits: SpendingLimits): void {
+  if (limits.perTransactionLimit <= 0) {
+    throw new Error(
+      'Invalid corporateCreditCard config: perTransactionLimit must be greater than zero.'
+    );
+  }
+  if (limits.totalBudgetLimit <= 0) {
+    throw new Error(
+      'Invalid corporateCreditCard config: totalBudgetLimit must be greater than zero.'
+    );
+  }
+  if (
+    limits.requireApprovalAbove !== undefined &&
+    limits.requireApprovalAbove <= 0
+  ) {
+    throw new Error(
+      'Invalid corporateCreditCard config: requireApprovalAbove must be greater than zero.'
+    );
+  }
+  if (limits.dailyLimit !== undefined && limits.dailyLimit <= 0) {
+    throw new Error(
+      'Invalid corporateCreditCard config: dailyLimit must be greater than zero.'
+    );
+  }
+  if (
+    limits.requireApprovalAbove !== undefined &&
+    limits.requireApprovalAbove > limits.perTransactionLimit
+  ) {
+    throw new Error(
+      'Invalid corporateCreditCard config: requireApprovalAbove cannot exceed perTransactionLimit.'
+    );
   }
 }
