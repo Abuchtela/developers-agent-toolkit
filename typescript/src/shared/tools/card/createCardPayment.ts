@@ -46,7 +46,7 @@ export const execute = async (
     return JSON.stringify({
       status: 'declined',
       declineReason:
-        'Corporate credit card is not configured. Provide a CorporateCreditCardConfig when initialising the toolkit.',
+        'Corporate credit card is not configured. Provide a CorporateCreditCardConfig when initializing the toolkit.',
     });
   }
 

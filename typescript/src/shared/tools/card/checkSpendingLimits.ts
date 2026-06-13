@@ -15,7 +15,7 @@ export const execute = async (
   if (!context.cardContext) {
     return JSON.stringify({
       error:
-        'Corporate credit card is not configured. Provide a CorporateCreditCardConfig when initialising the toolkit.',
+        'Corporate credit card is not configured. Provide a CorporateCreditCardConfig when initializing the toolkit.',
     });
   }
 

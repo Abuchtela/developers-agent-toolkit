@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { ToolAnnotations } from '@modelcontextprotocol/sdk/types.js';
+import type { BudgetTracker } from '@/shared/card/budgetTracker';
 
 export interface Tool {
   name: string;
@@ -76,5 +77,5 @@ export interface CardTransaction {
 export interface CardContext {
   spendingLimits: SpendingLimits;
   /** Mutable tracker; shared by all card tools within the same session. */
-  budgetTracker: import('./card/budgetTracker').BudgetTracker;
+  budgetTracker: BudgetTracker;
 }
