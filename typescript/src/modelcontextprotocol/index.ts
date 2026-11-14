@@ -194,6 +194,29 @@ function parseAPISpecificationPathAndServiceId(
 }
 
 function validateSpendingLimits(limits: SpendingLimits): void {
+  if (!Number.isFinite(limits.perTransactionLimit)) {
+    throw new Error(
+      'Invalid corporateCreditCard config: perTransactionLimit must be a finite number.'
+    );
+  }
+  if (!Number.isFinite(limits.totalBudgetLimit)) {
+    throw new Error(
+      'Invalid corporateCreditCard config: totalBudgetLimit must be a finite number.'
+    );
+  }
+  if (
+    limits.requireApprovalAbove !== undefined &&
+    !Number.isFinite(limits.requireApprovalAbove)
+  ) {
+    throw new Error(
+      'Invalid corporateCreditCard config: requireApprovalAbove must be a finite number.'
+    );
+  }
+  if (limits.dailyLimit !== undefined && !Number.isFinite(limits.dailyLimit)) {
+    throw new Error(
+      'Invalid corporateCreditCard config: dailyLimit must be a finite number.'
+    );
+  }
   if (limits.perTransactionLimit <= 0) {
     throw new Error(
       'Invalid corporateCreditCard config: perTransactionLimit must be greater than zero.'

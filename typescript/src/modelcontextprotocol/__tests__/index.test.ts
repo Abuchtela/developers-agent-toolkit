@@ -169,6 +169,48 @@ describe('buildContext function', () => {
   });
 
   describe('error cases', () => {
+    it.each([
+      ['perTransactionLimit', Number.NaN, 100],
+      ['perTransactionLimit', Number.POSITIVE_INFINITY, 100],
+      ['totalBudgetLimit', 100, Number.NaN],
+      ['totalBudgetLimit', 100, Number.POSITIVE_INFINITY],
+      ['requireApprovalAbove', Number.NaN, 100],
+      ['dailyLimit', Number.POSITIVE_INFINITY, 100],
+    ])('should throw for a non-finite %s', (field, firstLimit, secondLimit) => {
+      const spendingLimits = {
+        perTransactionLimit: 100,
+        totalBudgetLimit: 1000,
+        ...(field === 'requireApprovalAbove'
+          ? { requireApprovalAbove: firstLimit }
+          : field === 'dailyLimit'
+            ? { dailyLimit: firstLimit }
+            : field === 'perTransactionLimit'
+              ? { perTransactionLimit: firstLimit }
+              : { totalBudgetLimit: secondLimit }),
+      };
+
+      expect(() =>
+        buildContext({ corporateCreditCard: { spendingLimits } })
+      ).toThrow(
+        `Invalid corporateCreditCard config: ${field} must be a finite number.`
+      );
+    });
+
+    it('should throw when a required spending limit is missing', () => {
+      const spendingLimits = {
+        perTransactionLimit: 100,
+      } as unknown as {
+        perTransactionLimit: number;
+        totalBudgetLimit: number;
+      };
+
+      expect(() =>
+        buildContext({ corporateCreditCard: { spendingLimits } })
+      ).toThrow(
+        'Invalid corporateCreditCard config: totalBudgetLimit must be a finite number.'
+      );
+    });
+
     it('should throw error for invalid service URL format', () => {
       expect(() => {
         buildContext({
