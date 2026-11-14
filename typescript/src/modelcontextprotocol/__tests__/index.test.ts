@@ -176,26 +176,25 @@ describe('buildContext function', () => {
       ['totalBudgetLimit', 100, Number.POSITIVE_INFINITY],
       ['requireApprovalAbove', Number.NaN, 100],
       ['dailyLimit', Number.POSITIVE_INFINITY, 100],
-    ])(
-      'should throw for a non-finite %s',
-      (field, firstLimit, secondLimit) => {
-        const spendingLimits = {
-          perTransactionLimit: 100,
-          totalBudgetLimit: 1000,
-          ...(field === 'requireApprovalAbove'
-            ? { requireApprovalAbove: firstLimit }
-            : field === 'dailyLimit'
-              ? { dailyLimit: firstLimit }
-              : field === 'perTransactionLimit'
-                ? { perTransactionLimit: firstLimit }
-                : { totalBudgetLimit: secondLimit }),
-        };
+    ])('should throw for a non-finite %s', (field, firstLimit, secondLimit) => {
+      const spendingLimits = {
+        perTransactionLimit: 100,
+        totalBudgetLimit: 1000,
+        ...(field === 'requireApprovalAbove'
+          ? { requireApprovalAbove: firstLimit }
+          : field === 'dailyLimit'
+            ? { dailyLimit: firstLimit }
+            : field === 'perTransactionLimit'
+              ? { perTransactionLimit: firstLimit }
+              : { totalBudgetLimit: secondLimit }),
+      };
 
-        expect(() =>
-          buildContext({ corporateCreditCard: { spendingLimits } })
-        ).toThrow(`Invalid corporateCreditCard config: ${field} must be a finite number.`);
-      }
-    );
+      expect(() =>
+        buildContext({ corporateCreditCard: { spendingLimits } })
+      ).toThrow(
+        `Invalid corporateCreditCard config: ${field} must be a finite number.`
+      );
+    });
 
     it('should throw when a required spending limit is missing', () => {
       const spendingLimits = {

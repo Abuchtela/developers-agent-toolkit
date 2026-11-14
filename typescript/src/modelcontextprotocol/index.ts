@@ -212,10 +212,7 @@ function validateSpendingLimits(limits: SpendingLimits): void {
       'Invalid corporateCreditCard config: requireApprovalAbove must be a finite number.'
     );
   }
-  if (
-    limits.dailyLimit !== undefined &&
-    !Number.isFinite(limits.dailyLimit)
-  ) {
+  if (limits.dailyLimit !== undefined && !Number.isFinite(limits.dailyLimit)) {
     throw new Error(
       'Invalid corporateCreditCard config: dailyLimit must be a finite number.'
     );
